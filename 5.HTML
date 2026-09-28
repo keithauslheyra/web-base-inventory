@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sari-Sari Store & Grocery Management System</title>
+    <style>
+        :root {
+            --primary: #ec4899;
+            --primary-hover: #db2777;
+            --secondary: #10b981;
+            --secondary-hover: #059669;
+            --bg-main: #fcf8fa;
+            --bg-card: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #f3e8ff;
+            --accent-pink: #fbcfe8;
+            --accent-mint: #a7f3d0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- AUTH SECTION --- */
+        #auth-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, var(--accent-pink), var(--accent-mint));
+        }
+
+        .auth-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .auth-card h2 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            width: auto;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-secondary { background: var(--secondary); color: white; }
+        .btn-secondary:hover { background: var(--secondary-hover); }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+
+        /* --- APP LAYOUT --- */
+        #app-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        sidebar {
+            width: 260px;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand {
+            padding: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .nav-list {
+            list-style: none;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 0.9rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: #fdf2f8;
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            height: 60px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        /* --- COMPONENTS --- */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--secondary);
+        }
+
+        .card h3 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .card p {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #f3e8ff;
+            padding: 1rem;
+        }
+
+        .product-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editable-field {
+            border: 1px solid transparent;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            transition: border 0.2s;
+        }
+
+        .editable-field:hover, .editable-field:focus {
+            border: 1px solid var(--primary);
+            background: #fff0f6;
+            outline: none;
+        }
+
+        .product-title { 
+            font-weight: bold; 
+            font-size: 1.05rem; 
+            color: var(--text-main);
+        }
+
+        .product-price { 
+            color: var(--primary); 
+            font-weight: bold; 
+            font-size: 1.1rem; 
+            margin-bottom: 0.25rem;
+        }
+
+        .product-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            flex: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: middle;
+        }
+
+        th { background-color: #f9fafb; font-size: 0.85rem; color: var(--text-muted); }
+
+        .badge {
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .badge-pending { background: #fef3c7; color: #d97706; }
+        .badge-confirmed { background: #dbeafe; color: #2563eb; }
+        .badge-preparing { background: #e0e7ff; color: #4338ca; }
+        .badge-out_for_delivery { background: #fce7f3; color: #be185d; }
+        .badge-delivered { background: #d1fae5; color: #059669; }
+        .badge-cancelled { background: #fee2e2; color: #dc2626; }
+
+        /* --- TIMELINE TRACKER STYLES --- */
+        .timeline-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            margin: 2rem 0;
+            padding: 0 10px;
+        }
+
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            background: #e5e7eb;
+            height: 4px;
+            width: 80%;
+            top: 20px;
+            left: 10%;
+            z-index: 1;
+        }
+
+        .timeline-step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px auto;
+            font-weight: bold;
+            border: 3px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .timeline-step.active .step-icon {
+            background: var(--primary);
+            color: white;
+        }
+
+        .timeline-step.completed .step-icon {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .timeline-step.active .step-label,
+        .timeline-step.completed .step-label {
+            color: var(--text-main);
+        }
+
+        .step-time {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* --- PROFILE CARD STYLES --- */
+        .profile-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            max-width: 600px;
+        }
+
+        .profile-row {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #f3f4f6;
+            padding-bottom: 0.75rem;
+        }
+
+        .profile-label {
+            width: 150px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .profile-value {
+            flex: 1;
+            color: var(--text-main);
+        }
+
+        /* --- MODAL DIALOG --- */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 650px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            #app-container { flex-direction: column; }
+            sidebar { width: 100%; height: auto; }
+            .nav-list { display: flex; overflow-x: auto; }
+            .nav-item { white-space: nowrap; }
+            .profile-row { flex-direction: column; }
+            .profile-label { width: 100%; margin-bottom: 0.25rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- AUTHENTICATION CONTAINER -->
+    <div id="auth-container">
+        <div class="auth-card">
+            <h2>System Login</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="login-role">
+                        <option value="sari_sari">Sari-Sari Store Owner</option>
+                        <option value="grocery">Grocery Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Store ID / Username</label>
+                    <input type="text" id="login-username" value="store_keith" required>
+                </div>
+                <div class="form-group">
+                    <label>Password (Default: 12345)</label>
+                    <input type="password" id="login-password" value="12345" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app-container" class="hidden">
+        <sidebar>
+            <div class="brand" id="brand-title">SupplyChain Portal</div>
+            <ul class="nav-list" id="nav-items"></ul>
+        </sidebar>
+        
+        <main>
+            <header>
+                <div id="user-display">Role: Guest</div>
+                <button class="btn btn-secondary" onclick="logout()" style="width: auto; padding: 0.4rem 1rem;">Logout</button>
+            </header>
+
+            <div class="content-area" id="main-content">
+                <!-- Dynamic Content Load Areas -->
+            </div>
+        </main>
+    </div>
+
+    <!-- ORDER DETAILS & TRACKING MODAL -->
+    <div id="order-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-order-id">Order Details</h3>
+                <button class="close-btn" onclick="closeOrderModal()">&times;</button>
+            </div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- IN-MEMORY DATABASE ---
+        const DB = {
+            stores: {
+                "store_keith": {
+                    id: "store_keith",
+                    storeName: "Keith Sari-Sari Store",
+                    ownerName: "Keith Rivera",
+                    deliveryAddress: "Zone 2, Main Street, Buguey, Cagayan",
+                    contactNumber: "0917-123-4567"
+                }
+            },
+            groceryInventory: [],
+            sariStoreInventory: [
+                { id: 201, name: "Tuna 155g", category: "Canned Foods", sellingPrice: 45.00, stock: 12 }
+            ],
+            cart: [],
+            orders: [
+                {
+                    id: 'ORD-0001',
+                    storeId: 'store_keith',
+                    storeName: 'Keith Sari-Sari Store',
+                    ownerName: 'Keith Rivera',
+                    contactNumber: '0917-123-4567',
+                    address: 'Zone 2, Main Street, Buguey, Cagayan',
+                    items: [
+                        { id: 101, name: 'Rice 5kg', price: 285.00, qty: 2 },
+                        { id: 103, name: 'Cooking Oil 1L', price: 95.00, qty: 3 }
+                    ],
+                    total: 855.00,
+                    status: 'Delivered',
+                    orderDate: '2026-09-26',
+                    orderTime: '10:15 AM',
+                    timeline: {
+                        Pending: '10:15 AM',
+                        Confirmed: '10:18 AM',
+                        Preparing: '10:25 AM',
+                        'Out for Delivery': '10:45 AM',
+                        Delivered: '11:20 AM'
+                    }
+                }
+            ],
+            sales: []
+        };
+
+        let currentUser = null;
+
+        // --- AUTH LOGIC ---
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const role = document.getElementById('login-role').value;
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            
+            if (password !== "12345") {
+                alert("Incorrect Password! The correct password is: 12345");
+                return;
+            }
+
+            if (role === 'sari_sari' && !DB.stores[username]) {
+                DB.stores[username] = {
+                    id: username,
+                    storeName: username.toUpperCase() + " Store",
+                    ownerName: "Store Owner",
+                    deliveryAddress: "Address Not Set",
+                    contactNumber: "0900-000-0000"
+                };
+            }
+
+            currentUser = { username, role };
+            document.getElementById('auth-container').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+            
+            setupNavigation();
+            loadDashboard();
+        });
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('auth-container').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+        }
+
+        // --- NAVIGATION ROUTING ---
+        function setupNavigation() {
+            const nav = document.getElementById('nav-items');
+            const brand = document.getElementById('brand-title');
+            const userDisplay = document.getElementById('user-display');
+            
+            nav.innerHTML = '';
+
+            if(currentUser.role === 'sari_sari') {
+                const store = DB.stores[currentUser.username];
+                brand.innerText = "Store Hub";
+                userDisplay.innerText = `Sari-Sari Store: ${store.storeName}`;
+                
+                const links = [
+                    { label: "Dashboard", action: loadDashboard },
+                    { label: "Edit Store Profile", action: loadStoreProfile },
+                    { label: "Browse Grocery", action: loadBrowseGrocery },
+                    { label: "Shopping Cart", action: loadCart },
+                    { label: "My Orders", action: loadSariOrders }
+                ];
+                
+                links.forEach((link, idx) => {
+                    const li = document.createElement('li');
+                    li.className = `nav-item ${idx === 0 ? 'active' : ''}`;
+                    li.innerText = link.label;
+                    li.onclick = () => {
+                        document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+                        li.classList.add('active');
+                        link.action();
+                    };
+                    nav.appendChild(li);
+                });
+            } else {
+                brand.innerText = "Grocery Admin";
+                userDisplay.innerText = `Admin: ${currentUser.username}`;
+                
+                const links = [
+                    { label: "Dashboard", action: loadDashboard },
+                    { label: "Order Requests", action: loadGroceryOrders }
+                ];
+                
+                links.forEach((link, idx) => {
+                    const li = document.createElement('li');
+                    li.className = `nav-item ${idx === 0 ? 'active' : ''}`;
+                    li.innerText = link.label;
+                    li.onclick = () => {
+                        document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+                        li.classList.add('active');
+                        link.action();
+                    };
+                    nav.appendChild(li);
+                });
+            }
+        }
+
+        function closeOrderModal() {
+            document.getElementById('order-modal').classList.add('hidden');
+        }
+
+        // --- EDIT STORE PROFILE FEATURE ---
+        function loadStoreProfile() {
+            const container = document.getElementById('main-content');
+            const store = DB.stores[currentUser.username];
+
+            container.innerHTML = `
+                <h2>My Store Profile</h2><br>
+                <div class="profile-card">
+                    <div id="profile-view">
+                        <div class="profile-row">
+                            <div class="profile-label">Store Name:</div>
+                            <div class="profile-value"><strong>${store.storeName}</strong></div>
+                        </div>
+                        <div class="profile-row">
+                            <div class="profile-label">Owner Name:</div>
+                            <div class="profile-value">${store.ownerName}</div>
+                        </div>
+                        <div class="profile-row">
+                            <div class="profile-label">Delivery Address:</div>
+                            <div class="profile-value">${store.deliveryAddress}</div>
+                        </div>
+                        <div class="profile-row">
+                            <div class="profile-label">Contact Number:</div>
+                            <div class="profile-value">${store.contactNumber}</div>
+                        </div>
+                        <br>
+                        <button class="btn btn-primary" onclick="toggleEditProfile(true)">Edit Store Information</button>
+                    </div>
+
+                    <form id="profile-edit-form" class="hidden" onsubmit="saveStoreProfile(event)">
+                        <div class="form-group">
+                            <label>Store Name</label>
+                            <input type="text" id="edit-store-name" value="${store.storeName}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Owner Name</label>
+                            <input type="text" id="edit-owner-name" value="${store.ownerName}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Delivery Address</label>
+                            <textarea id="edit-delivery-address" rows="3" required>${store.deliveryAddress}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Contact Number</label>
+                            <input type="text" id="edit-contact-number" value="${store.contactNumber}" required>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                            <button type="submit" class="btn btn-secondary">Save Changes</button>
+                            <button type="button" class="btn btn-danger" onclick="toggleEditProfile(false)">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        function toggleEditProfile(isEditing) {
+            const viewDiv = document.getElementById('profile-view');
+            const editForm = document.getElementById('profile-edit-form');
+
+            if (isEditing) {
+                viewDiv.classList.add('hidden');
+                editForm.classList.remove('hidden');
+            } else {
+                viewDiv.classList.remove('hidden');
+                editForm.classList.add('hidden');
+            }
+        }
+
+        function saveStoreProfile(e) {
+            e.preventDefault();
+            const store = DB.stores[currentUser.username];
+            store.storeName = document.getElementById('edit-store-name').value.trim();
+            store.ownerName = document.getElementById('edit-owner-name').value.trim();
+            store.deliveryAddress = document.getElementById('edit-delivery-address').value.trim();
+            store.contactNumber = document.getElementById('edit-contact-number').value.trim();
+
+            alert("Store Profile Updated Successfully!");
+            setupNavigation();
+            loadStoreProfile();
+        }
+
+        // --- DASHBOARD VIEWS ---
+        function loadDashboard() {
+            const container = document.getElementById('main-content');
+            if (currentUser.role === 'sari_sari') {
+                const storeOrders = DB.orders.filter(o => o.storeId === currentUser.username);
+                const activeOrders = storeOrders.filter(o => o.status !== 'Delivered' && o.status !== 'Cancelled').length;
+                const totalSpent = storeOrders.reduce((sum, o) => sum + (o.status !== 'Cancelled' ? o.total : 0), 0);
+
+                container.innerHTML = `
+                    <h2>Sari-Sari Store Overview</h2><br>
+                    <div class="grid-cards">
+                        <div class="card">
+                            <h3>Active Restock Orders</h3>
+                            <p>${activeOrders}</p>
+                        </div>
+                        <div class="card">
+                            <h3>Total Purchase Expenses</h3>
+                            <p>₱${totalSpent.toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                        <h3>Quick Actions</h3><br>
+                        <button class="btn btn-primary btn-sm" onclick="loadBrowseGrocery()">Browse Wholesale Items</button>
+                        <button class="btn btn-secondary btn-sm" onclick="loadCart()">View Cart (${DB.cart.length})</button>
+                    </div>
+                `;
+            } else {
+                const pendingCount = DB.orders.filter(o => o.status === 'Pending').length;
+                const totalSales = DB.orders.reduce((sum, o) => sum + (o.status !== 'Cancelled' ? o.total : 0), 0);
+
+                container.innerHTML = `
+                    <h2>Grocery Management Dashboard</h2><br>
+                    <div class="grid-cards">
+                        <div class="card">
+                            <h3>Pending Requests</h3>
+                            <p>${pendingCount}</p>
+                        </div>
+                        <div class="card">
+                            <h3>Total Grocery Sales</h3>
+                            <p>₱${totalSales.toFixed(2)}</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // --- WHOLESALE PRODUCTS DATA (INCLUDING DRINKS CATEGORY) ---
+        const wholesaleProducts = [
+            // Standard Wholesale Grocery Products
+            { id: 101, name: "Rice 5kg", category: "Rice & Grains", price: 285.00, stock: 20, size: "5kg", description: "Premium quality white rice" },
+            { id: 102, name: "Sugar 1kg", category: "Cooking Essentials", price: 75.00, stock: 30, size: "1kg", description: "Refined white sugar" },
+            { id: 103, name: "Cooking Oil 1L", category: "Cooking Essentials", price: 95.00, stock: 25, size: "1L", description: "Pure vegetable cooking oil" },
+            { id: 104, name: "Soy Sauce 1L", category: "Cooking Essentials", price: 65.00, stock: 20, size: "1L", description: "Traditional brewed soy sauce" },
+            { id: 105, name: "Vinegar 1L", category: "Cooking Essentials", price: 55.00, stock: 20, size: "1L", description: "Distilled cane vinegar" },
+            { id: 106, name: "Sardines 155g", category: "Canned Foods", price: 28.00, stock: 40, size: "155g", description: "Sardines in rich tomato sauce" },
+            { id: 107, name: "Corned Beef 175g", category: "Canned Foods", price: 45.00, stock: 35, size: "175g", description: "Savory canned corned beef" },
+            { id: 108, name: "Tuna 155g", category: "Canned Foods", price: 38.00, stock: 30, size: "155g", description: "Canned tuna flakes in oil" },
+            { id: 109, name: "Instant Noodles", category: "Instant Foods", price: 12.00, stock: 50, size: "55g", description: "Quick-cook flavor noodles" },
+
+            // --- DRINKS CATEGORY PRODUCTS ---
+            // 1. SOFT DRINKS
+            { id: 301, name: "Coca-Cola", category: "DRINKS", subcategory: "SOFT DRINKS", price: 38.00, stock: 50, size: "1.5L", description: "Classic refreshing cola drink" },
+            { id: 302, name: "Coca-Cola Zero Sugar", category: "DRINKS", subcategory: "SOFT DRINKS", price: 38.00, stock: 40, size: "1.5L", description: "Great Coca-Cola taste with zero sugar" },
+            { id: 303, name: "Pepsi", category: "DRINKS", subcategory: "SOFT DRINKS", price: 35.00, stock: 45, size: "1.5L", description: "Bold, refreshing cola beverage" },
+            { id: 304, name: "Pepsi Zero Sugar", category: "DRINKS", subcategory: "SOFT DRINKS", price: 35.00, stock: 30, size: "1.5L", description: "Maximum taste with zero sugar" },
+            { id: 305, name: "RC Cola", category: "DRINKS", subcategory: "SOFT DRINKS", price: 30.00, stock: 40, size: "1.5L", description: "Crisp and satisfying cola taste" },
+            { id: 306, name: "Sprite", category: "DRINKS", subcategory: "SOFT DRINKS", price: 38.00, stock: 50, size: "1.5L", description: "Clean, crisp lemon-lime soda" },
+            { id: 307, name: "Royal Tru-Orange", category: "DRINKS", subcategory: "SOFT DRINKS", price: 38.00, stock: 40, size: "1.5L", description: "Fruity and sparkling orange drink" },
+            { id: 308, name: "7UP", category: "DRINKS", subcategory: "SOFT DRINKS", price: 35.00, stock: 35, size: "1.5L", description: "Refreshing lemon-lime flavored soda" },
+            { id: 309, name: "Mountain Dew", category: "DRINKS", subcategory: "SOFT DRINKS", price: 35.00, stock: 45, size: "1.5L", description: "Exhilarating citrus soft drink" },
+            { id: 310, name: "Fanta", category: "DRINKS", subcategory: "SOFT DRINKS", price: 35.00, stock: 25, size: "1.5L", description: "Bright and bubbly fruit soda" },
+            { id: 311, name: "Mirinda", category: "DRINKS", subcategory: "SOFT DRINKS", price: 32.00, stock: 25, size: "1.5L", description: "Vibrant and delicious orange soda" },
+            { id: 312, name: "Sarsi", category: "DRINKS", subcategory: "SOFT DRINKS", price: 35.00, stock: 30, size: "1.5L", description: "Distinct local sarsaparilla soda" },
+            { id: 313, name: "Mug Root Beer", category: "DRINKS", subcategory: "SOFT DRINKS", price: 45.00, stock: 20, size: "330ml Can", description: "Rich, creamy root beer taste" },
+            { id: 314, name: "A&W Root Beer", category: "DRINKS", subcategory: "SOFT DRINKS", price: 48.00, stock: 20, size: "330ml Can", description: "Classic American root beer drink" },
+            { id: 315, name: "Dr Pepper", category: "DRINKS", subcategory: "SOFT DRINKS", price: 50.00, stock: 15, size: "330ml Can", description: "Unique blend of 23 signature flavors" },
+
+            // 2. WATER
+            { id: 316, name: "Wilkins", category: "DRINKS", subcategory: "WATER", price: 25.00, stock: 60, size: "1L", description: "Pure and safe distilled drinking water" },
+            { id: 317, name: "Absolute", category: "DRINKS", subcategory: "WATER", price: 24.00, stock: 60, size: "1L", description: "Distilled water certified for purity" },
+            { id: 318, name: "Nature's Spring", category: "DRINKS", subcategory: "WATER", price: 18.00, stock: 100, size: "1L", description: "Affordable and clean drinking water" },
+            { id: 319, name: "Summit", category: "DRINKS", subcategory: "WATER", price: 22.00, stock: 50, size: "1L", description: "Natural drinking water for active lifestyles" },
+            { id: 320, name: "Aqua", category: "DRINKS", subcategory: "WATER", price: 15.00, stock: 80, size: "500ml", description: "Pure mineral spring water" },
+
+            // 3. JUICE
+            { id: 321, name: "Zest-O", category: "DRINKS", subcategory: "JUICE", price: 12.00, stock: 100, size: "200ml Doypack", description: "Classic orange juice drink pouch" },
+            { id: 322, name: "C2", category: "DRINKS", subcategory: "JUICE", price: 20.00, stock: 60, size: "500ml", description: "Ready-to-drink green tea juice blend" },
+            { id: 323, name: "Minute Maid", category: "DRINKS", subcategory: "JUICE", price: 28.00, stock: 40, size: "330ml", description: "Refreshing orange juice beverage with pulp" },
+            { id: 324, name: "Del Monte Juice", category: "DRINKS", subcategory: "JUICE", price: 85.00, stock: 35, size: "1L Tetra Pak", description: "100% Pineapple Juice blend" },
+            { id: 325, name: "Dole Juice", category: "DRINKS", subcategory: "JUICE", price: 82.00, stock: 30, size: "1L Tetra Pak", description: "100% natural pineapple juice" },
+            { id: 326, name: "Tropicana", category: "DRINKS", subcategory: "JUICE", price: 90.00, stock: 25, size: "1L Tetra Pak", description: "Delicious orange juice beverage" },
+
+            // 4. MILK
+            { id: 327, name: "Bear Brand", category: "DRINKS", subcategory: "MILK", price: 30.00, stock: 50, size: "180ml Ready-to-Drink", description: "Sterilized milk with essential nutrients" },
+            { id: 328, name: "Alaska", category: "DRINKS", subcategory: "MILK", price: 75.00, stock: 40, size: "1L Tetra Pak", description: "Nutritious full cream liquid milk" },
+            { id: 329, name: "Nido", category: "DRINKS", subcategory: "MILK", price: 35.00, stock: 45, size: "110ml UHT Pack", description: "Fortified milk drink for growing kids" },
+            { id: 330, name: "Magnolia", category: "DRINKS", subcategory: "MILK", price: 80.00, stock: 30, size: "1L Tetra Pak", description: "Fresh and creamy wholesome milk" },
+            { id: 331, name: "Selecta", category: "DRINKS", subcategory: "MILK", price: 82.00, stock: 30, size: "1L Tetra Pak", description: "Fortified full cream milk drink" },
+
+            // 5. COFFEE
+            { id: 332, name: "Nescafé", category: "DRINKS", subcategory: "COFFEE", price: 35.00, stock: 50, size: "240ml Can", description: "Ready-to-drink canned iced coffee" },
+            { id: 333, name: "Great Taste", category: "DRINKS", subcategory: "COFFEE", price: 28.00, stock: 40, size: "240ml PET Bottle", description: "Smooth white coffee drink" },
+            { id: 334, name: "Kopiko", category: "DRINKS", subcategory: "COFFEE", price: 30.00, stock: 45, size: "240ml PET Bottle", description: "78C Lucky Day strong iced coffee" },
+            { id: 335, name: "San Mig Coffee", category: "DRINKS", subcategory: "COFFEE", price: 12.00, stock: 60, size: "20g Sachet", description: "Sugar-free 3-in-1 coffee mix" },
+            { id: 336, name: "UCC", category: "DRINKS", subcategory: "COFFEE", price: 65.00, stock: 25, size: "185ml Can", description: "Japanese quality iced coffee drink" },
+
+            // 6. CHOCOLATE DRINKS
+            { id: 337, name: "Milo", category: "DRINKS", subcategory: "CHOCOLATE DRINKS", price: 25.00, stock: 60, size: "180ml Pack", description: "Choco-malt nutritional drink" },
+            { id: 338, name: "Ovaltine", category: "DRINKS", subcategory: "CHOCOLATE DRINKS", price: 24.00, stock: 45, size: "180ml Pack", description: "Malty chocolate flavored drink" },
+            { id: 339, name: "Chuckie", category: "DRINKS", subcategory: "CHOCOLATE DRINKS", price: 28.00, stock: 50, size: "250ml Pack", description: "Rich chocolate flavored milk drink" },
+
+            // 7. ENERGY DRINKS
+            { id: 340, name: "Sting", category: "DRINKS", subcategory: "ENERGY DRINKS", price: 20.00, stock: 50, size: "330ml Bottle", description: "Strawberry flavored energy drink" },
+            { id: 341, name: "Cobra", category: "DRINKS", subcategory: "ENERGY DRINKS", price: 22.00, stock: 50, size: "350ml Bottle", description: "High-performance energy drink with B-vitamins" },
+            { id: 342, name: "Red Bull", category: "DRINKS", subcategory: "ENERGY DRINKS", price: 75.00, stock: 30, size: "250ml Can", description: "Vitalizes body and mind" },
+            { id: 343, name: "Monster", category: "DRINKS", subcategory: "ENERGY DRINKS", price: 95.00, stock: 25, size: "355ml Can", description: "Energy boost drink with smooth flavor" },
+
+            // 8. SPORTS DRINKS
+            { id: 344, name: "Gatorade", category: "DRINKS", subcategory: "SPORTS DRINKS", price: 45.00, stock: 40, size: "500ml Bottle", description: "Electrolyte rehydration sports drink" },
+            { id: 345, name: "Pocari Sweat", category: "DRINKS", subcategory: "SPORTS DRINKS", price: 48.00, stock: 35, size: "500ml Bottle", description: "Ion supply drink for quick hydration" },
+
+            // 9. TEA DRINKS
+            { id: 346, name: "Nestea", category: "DRINKS", subcategory: "TEA DRINKS", price: 30.00, stock: 45, size: "500ml Bottle", description: "Iced lemon tea ready to drink" },
+            { id: 347, name: "Lipton", category: "DRINKS", subcategory: "TEA DRINKS", price: 35.00, stock: 40, size: "450ml Bottle", description: "Real brewed iced tea drink" },
+            { id: 348, name: "C2 Green Tea", category: "DRINKS", subcategory: "TEA DRINKS", price: 20.00, stock: 60, size: "500ml Bottle", description: "Brewed green tea with apple flavor" },
+
+            // 10. YOGURT DRINKS
+            { id: 349, name: "Yakult", category: "DRINKS", subcategory: "YOGURT DRINKS", price: 50.00, stock: 40, size: "Pack of 5 (80ml)", description: "Probiotic cultured milk drink" },
+            { id: 350, name: "Dutch Mill", category: "DRINKS", subcategory: "YOGURT DRINKS", price: 25.00, stock: 50, size: "180ml Pack", description: "Yogurt drink blended with fruit juice" },
+            { id: 351, name: "Delight", category: "DRINKS", subcategory: "YOGURT DRINKS", price: 45.00, stock: 35, size: "Pack of 5 (100ml)", description: "Probiotic drink with active lactobacillus" },
+
+            // 11. POWDERED DRINKS
+            { id: 352, name: "Tang", category: "DRINKS", subcategory: "POWDERED DRINKS", price: 20.00, stock: 80, size: "20g Sachet", description: "Powdered orange juice drink mix" },
+            { id: 353, name: "Eight O'Clock", category: "DRINKS", subcategory: "POWDERED DRINKS", price: 18.00, stock: 70, size: "25g Sachet", description: "Powdered fruit drink mix" },
+            { id: 354, name: "Nestea Powder", category: "DRINKS", subcategory: "POWDERED DRINKS", price: 22.00, stock: 75, size: "25g Sachet", description: "Powdered iced tea lemon mix" },
+            { id: 355, name: "Milo Powder", category: "DRINKS", subcategory: "POWDERED DRINKS", price: 15.00, stock: 100, size: "24g Sachet", description: "Nutritious choco malt powder" }
+        ];
+
+        DB.groceryInventory = wholesaleProducts;
+
+        // Global Filter States
+        let currentCategoryFilter = 'All Products';
+        let currentSubcategoryFilter = 'ALL';
+        let currentSearchQuery = '';
+        let currentSortOption = 'default';
+
+        // --- ENHANCED BROWSE WHOLESALE GROCERY SECTION ---
+        function loadBrowseGrocery() {
+            const container = document.getElementById('main-content');
+            
+            const mainCategories = [
+                "All Products",
+                "DRINKS",
+                "Rice & Grains",
+                "Cooking Essentials",
+                "Canned Foods",
+                "Instant Foods"
+            ];
+
+            const drinkSubcategories = [
+                "ALL",
+                "SOFT DRINKS",
+                "WATER",
+                "JUICE",
+                "MILK",
+                "COFFEE",
+                "CHOCOLATE DRINKS",
+                "ENERGY DRINKS",
+                "SPORTS DRINKS",
+                "TEA DRINKS",
+                "YOGURT DRINKS",
+                "POWDERED DRINKS"
+            ];
+
+            container.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <h2 style="color: var(--primary);">Browse Wholesale Grocery Products</h2>
+                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem;">Affordable grocery products for sari-sari stores and small retailers.</p>
+                </div>
+
+                <!-- SEARCH AND SORT CONTROLS -->
+                <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; align-items: center; justify-content: space-between; background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
+                    <div style="flex: 1; min-width: 250px;">
+                        <input type="text" id="grocery-search-input" placeholder="Search products..." value="${currentSearchQuery}" oninput="handleGrocerySearch(this.value)" style="width: 100%; padding: 0.6rem; border: 1px solid #d1d5db; border-radius: 6px; outline: none;">
+                    </div>
+                    <div>
+                        <select id="grocery-sort-select" onchange="handleGrocerySort(this.value)" style="padding: 0.6rem; border: 1px solid #d1d5db; border-radius: 6px; background: white; outline: none; cursor: pointer;">
+                            <option value="default" ${currentSortOption === 'default' ? 'selected' : ''}>Sort By: Default</option>
+                            <option value="name-asc" ${currentSortOption === 'name-asc' ? 'selected' : ''}>Product Name A-Z</option>
+                            <option value="price-low" ${currentSortOption === 'price-low' ? 'selected' : ''}>Price: Low to High</option>
+                            <option value="price-high" ${currentSortOption === 'price-high' ? 'selected' : ''}>Price: High to Low</option>
+                            <option value="stock-available" ${currentSortOption === 'stock-available' ? 'selected' : ''}>Stock: Available</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- MAIN CATEGORY FILTER TABS -->
+                <div style="display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
+                    ${mainCategories.map(cat => `
+                        <button class="btn btn-sm" 
+                                style="background: ${currentCategoryFilter === cat ? 'var(--primary)' : 'white'}; color: ${currentCategoryFilter === cat ? 'white' : 'var(--text-main)'}; border: 1px solid ${currentCategoryFilter === cat ? 'var(--primary)' : '#d1d5db'}; white-space: nowrap;"
+                                onclick="filterGroceryCategory('${cat}')">
+                            ${cat}
+                        </button>
+                    `).join('')}
+                </div>
+
+                <!-- DRINKS SUBCATEGORY FILTERS (Appears when DRINKS category is selected) -->
+                ${currentCategoryFilter === 'DRINKS' ? `
+                    <div style="background: #fff0f6; padding: 0.75rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid var(--accent-pink);">
+                        <div style="font-size: 0.85rem; font-weight: bold; color: var(--primary); margin-bottom: 0.5rem;">Drink Subcategories:</div>
+                        <div style="display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.25rem;">
+                            ${drinkSubcategories.map(sub => `
+                                <button class="btn btn-sm" 
+                                        style="background: ${currentSubcategoryFilter === sub ? 'var(--secondary)' : 'white'}; color: ${currentSubcategoryFilter === sub ? 'white' : 'var(--text-main)'}; border: 1px solid ${currentSubcategoryFilter === sub ? 'var(--secondary)' : '#d1d5db'}; font-size: 0.75rem; white-space: nowrap;"
+                                        onclick="filterDrinkSubcategory('${sub}')">
+                                    ${sub}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : '<div style="margin-bottom: 1rem;"></div>'}
+
+                <!-- PRODUCT GRID DISPLAY -->
+                <div id="wholesale-products-grid" class="product-grid"></div>
+            `;
+
+            renderWholesaleProducts();
+        }
+
+        function filterGroceryCategory(cat) {
+            currentCategoryFilter = cat;
+            currentSubcategoryFilter = 'ALL';
+            loadBrowseGrocery();
+        }
+
+        function filterDrinkSubcategory(sub) {
+            currentSubcategoryFilter = sub;
+            loadBrowseGrocery();
+        }
+
+        function handleGrocerySearch(query) {
+            currentSearchQuery = query.toLowerCase().trim();
+            renderWholesaleProducts();
+        }
+
+        function handleGrocerySort(option) {
+            currentSortOption = option;
+            renderWholesaleProducts();
+        }
+
+        function updateProductField(id, field, value) {
+            const product = DB.groceryInventory.find(p => p.id === id);
+            if (product) {
+                if (field === 'price' || field === 'stock') {
+                    product[field] = parseFloat(value) || 0;
+                } else {
+                    product[field] = value;
+                }
+            }
+        }
+
+        function renderWholesaleProducts() {
+            const grid = document.getElementById('wholesale-products-grid');
+            if (!grid) return;
+
+            let filtered = DB.groceryInventory.filter(p => {
+                const matchesCategory = (currentCategoryFilter === 'All Products') || (p.category === currentCategoryFilter);
+                const matchesSubcategory = (currentCategoryFilter !== 'DRINKS' || currentSubcategoryFilter === 'ALL' || p.subcategory === currentSubcategoryFilter);
+                const matchesSearch = p.name.toLowerCase().includes(currentSearchQuery) || 
+                                      p.category.toLowerCase().includes(currentSearchQuery) ||
+                                      (p.subcategory && p.subcategory.toLowerCase().includes(currentSearchQuery)) ||
+                                      (p.description && p.description.toLowerCase().includes(currentSearchQuery));
+                return matchesCategory && matchesSubcategory && matchesSearch;
+            });
+
+            if (currentSortOption === 'name-asc') {
+                filtered.sort((a, b) => a.name.localeCompare(b.name));
+            } else if (currentSortOption === 'price-low') {
+                filtered.sort((a, b) => a.price - b.price);
+            } else if (currentSortOption === 'price-high') {
+                filtered.sort((a, b) => b.price - a.price);
+            } else if (currentSortOption === 'stock-available') {
+                filtered.sort((a, b) => b.stock - a.stock);
+            }
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 3rem; background: white; border-radius: 8px; color: var(--text-muted);">No products match your criteria.</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(item => `
+                <div class="product-card">
+                    <div class="product-info">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.25rem;">
+                            <span class="product-title editable-field" contenteditable="true" onblur="updateProductField(${item.id}, 'name', this.innerText)">${item.name}</span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase;">
+                            ${item.category}${item.subcategory ? ' &bull; ' + item.subcategory : ''}
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; gap: 0.2rem;" class="product-price">
+                            ₱<span class="editable-field" contenteditable="true" onblur="updateProductField(${item.id}, 'price', this.innerText)">${item.price.toFixed(2)}</span>
+                        </div>
+
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem;">
+                            <strong>Size/Volume:</strong> <span class="editable-field" contenteditable="true" onblur="updateProductField(${item.id}, 'size', this.innerText)">${item.size || 'N/A'}</span>
+                        </div>
+
+                        <div style="font-size: 0.85rem; margin-bottom: 0.5rem; color: ${item.stock > 0 ? 'var(--text-main)' : 'red'};">
+                            <strong>Stock:</strong> <span class="editable-field" contenteditable="true" onblur="updateProductField(${item.id}, 'stock', this.innerText)">${item.stock}</span>
+                        </div>
+
+                        <div class="product-desc editable-field" contenteditable="true" onblur="updateProductField(${item.id}, 'description', this.innerText)">${item.description || 'No description available.'}</div>
+
+                        <button class="btn btn-primary" onclick="addToCart(${item.id})" ${item.stock <= 0 ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
+                            ${item.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addToCart(id) {
+            const item = DB.groceryInventory.find(p => p.id === id);
+            const cartItem = DB.cart.find(c => c.id === id);
+
+            if (cartItem) {
+                if(cartItem.qty < item.stock) {
+                    cartItem.qty++;
+                    alert(`Added another ${item.name} to cart.`);
+                } else {
+                    alert("Cannot add more. Limit reached for available stock!");
+                }
+            } else {
+                DB.cart.push({ ...item, qty: 1 });
+                alert(`${item.name} added to cart!`);
+            }
+        }
+
+        // --- CART & CHECKOUT WITH AUTOMATIC STORE DETAILS ---
+        function loadCart() {
+            const container = document.getElementById('main-content');
+            const store = DB.stores[currentUser.username];
+            
+            if (DB.cart.length === 0) {
+                container.innerHTML = `
+                    <h2>Shopping Cart</h2><br>
+                    <div style="background: white; padding: 2rem; text-align: center; border-radius: 8px;">
+                        <p>Your cart is empty.</p><br>
+                        <button class="btn btn-primary btn-sm" onclick="loadBrowseGrocery()">Start Browsing</button>
+                    </div>`;
+                return;
+            }
+
+            let total = DB.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            container.innerHTML = `
+                <h2>Shopping Cart</h2><br>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Subtotal</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${DB.cart.map((item, index) => `
+                            <tr>
+                                <td>
+                                    <strong>${item.name}</strong>
+                                </td>
+                                <td>₱${item.price.toFixed(2)}</td>
+                                <td>
+                                    <input type="number" value="${item.qty}" min="1" max="${item.stock}" style="width: 60px; padding: 0.3rem;" onchange="updateCartQty(${index}, this.value)">
+                                </td>
+                                <td>₱${(item.price * item.qty).toFixed(2)}</td>
+                                <td><button class="btn btn-danger btn-sm" onclick="removeFromCart(${index})">Remove</button></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                
+                <div style="display: flex; justify-content: space-between; margin-top: 1.5rem; background: white; padding: 1.5rem; border-radius: 8px;">
+                    <div>
+                        <h4>Delivery Information (Auto-Filled)</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 5px;">
+                            <strong>Store Name:</strong> ${store.storeName}<br>
+                            <strong>Owner:</strong> ${store.ownerName}<br>
+                            <strong>Address:</strong> ${store.deliveryAddress}<br>
+                            <strong>Contact:</strong> ${store.contactNumber}
+                        </p>
+                        <button class="btn btn-sm btn-secondary" style="margin-top: 8px;" onclick="loadStoreProfile()">Change Address</button>
+                    </div>
+                    <div style="text-align: right;">
+                        <h3>Total: ₱${total.toFixed(2)}</h3><br>
+                        <button class="btn btn-primary" style="width: auto; padding: 0.75rem 2rem;" onclick="checkoutOrder()">Place Order Request</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateCartQty(index, qty) {
+            const newQty = parseInt(qty);
+            if (newQty > 0) {
+                DB.cart[index].qty = newQty;
+                loadCart();
+            }
+        }
+
+        function removeFromCart(index) {
+            DB.cart.splice(index, 1);
+            loadCart();
+        }
+
+        function checkoutOrder() {
+            if (DB.cart.length === 0) return;
+            const store = DB.stores[currentUser.username];
+            
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const newOrder = {
+                id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
+                storeId: store.id,
+                storeName: store.storeName,
+                ownerName: store.ownerName,
+                contactNumber: store.contactNumber,
+                address: store.deliveryAddress,
+                items: [...DB.cart],
+                total: DB.cart.reduce((sum, i) => sum + (i.price * i.qty), 0),
+                status: 'Pending',
+                orderDate: now.toISOString().split('T')[0],
+                orderTime: timeStr,
+                timeline: {
+                    Pending: timeStr
+                }
+            };
+
+            DB.orders.unshift(newOrder);
+            DB.cart = [];
+            alert(`Order ${newOrder.id} successfully submitted to Wholesale Grocery Admin!`);
+            loadSariOrders();
+        }
+
+        // --- SARI-SARI STORE ORDERS & LIVE TIMELINE ---
+        function loadSariOrders() {
+            const container = document.getElementById('main-content');
+            const myOrders = DB.orders.filter(o => o.storeId === currentUser.username);
+
+            container.innerHTML = `
+                <h2>My Wholesale Orders</h2><br>
+                ${myOrders.length === 0 ? '<p>No orders placed yet.</p>' : `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date & Time</th>
+                                <th>Total Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${myOrders.map(o => `
+                                <tr>
+                                    <td><strong>${o.id}</strong></td>
+                                    <td>${o.orderDate} ${o.orderTime}</td>
+                                    <td>₱${o.total.toFixed(2)}</td>
+                                    <td><span class="badge badge-${o.status.toLowerCase().replace(/ /g, '_')}">${o.status}</span></td>
+                                    <td><button class="btn btn-primary btn-sm" onclick="viewOrderDetails('${o.id}')">Track & Details</button></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `}
+            `;
+        }
+
+        // --- GROCERY ADMIN ORDER MANAGEMENT ---
+        function loadGroceryOrders() {
+            const container = document.getElementById('main-content');
+
+            container.innerHTML = `
+                <h2>Incoming Store Orders</h2><br>
+                ${DB.orders.length === 0 ? '<p>No orders received yet.</p>' : `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Store Name</th>
+                                <th>Address</th>
+                                <th>Total Amount</th>
+                                <th>Status</th>
+                                <th>Update Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${DB.orders.map(o => `
+                                <tr>
+                                    <td><strong>${o.id}</strong></td>
+                                    <td>${o.storeName}<br><small style="color:var(--text-muted);">${o.ownerName}</small></td>
+                                    <td>${o.address}</td>
+                                    <td>₱${o.total.toFixed(2)}</td>
+                                    <td><span class="badge badge-${o.status.toLowerCase().replace(/ /g, '_')}">${o.status}</span></td>
+                                    <td>
+                                        <select onchange="updateOrderStatus('${o.id}', this.value)" style="padding: 0.3rem;">
+                                            <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                            <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                            <option value="Preparing" ${o.status === 'Preparing' ? 'selected' : ''}>Preparing</option>
+                                            <option value="Out for Delivery" ${o.status === 'Out for Delivery' ? 'selected' : ''}>Out for Delivery</option>
+                                            <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                            <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                        </select>
+                                    </td>
+                                    <td><button class="btn btn-secondary btn-sm" onclick="viewOrderDetails('${o.id}')">View Details</button></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `}
+            `;
+        }
+
+        function updateOrderStatus(orderId, newStatus) {
+            const order = DB.orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = newStatus;
+                const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                order.timeline[newStatus] = timeStr;
+                alert(`Order ${orderId} updated to: ${newStatus}`);
+                loadGroceryOrders();
+            }
+        }
+
+        // --- TRACKING MODAL & VISUAL TIMELINE ---
+        function viewOrderDetails(orderId) {
+            const order = DB.orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            document.getElementById('modal-order-id').innerText = `Order Tracking: ${order.id}`;
+            
+            const steps = ['Pending', 'Confirmed', 'Preparing', 'Out for Delivery', 'Delivered'];
+            const currentIdx = steps.indexOf(order.status);
+
+            let timelineHTML = '';
+            if (order.status === 'Cancelled') {
+                timelineHTML = `<div style="text-align: center; color: red; font-weight: bold; margin: 1.5rem 0;">THIS ORDER HAS BEEN CANCELLED</div>`;
+            } else {
+                timelineHTML = `
+                    <div class="timeline-container">
+                        ${steps.map((step, idx) => {
+                            let stateClass = '';
+                            if (idx < currentIdx) stateClass = 'completed';
+                            else if (idx === currentIdx) stateClass = 'active';
+
+                            const timestamp = order.timeline[step] || '--:--';
+
+                            return `
+                                <div class="timeline-step ${stateClass}">
+                                    <div class="step-icon">${idx + 1}</div>
+                                    <div class="step-label">${step}</div>
+                                    <div class="step-time">${timestamp}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+
+            document.getElementById('modal-body').innerHTML = `
+                ${timelineHTML}
+                <div style="background: #f9fafb; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+                    <strong>Store Information:</strong><br>
+                    Store Name: ${order.storeName}<br>
+                    Owner: ${order.ownerName} (${order.contactNumber})<br>
+                    Address: ${order.address}
+                </div>
+                <h4>Ordered Items:</h4>
+                <ul style="list-style: none; margin-top: 0.5rem; border-top: 1px solid #e5e7eb;">
+                    ${order.items.map(item => `
+                        <li style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6;">
+                            <span>${item.name} (x${item.qty})</span>
+                            <span>₱${(item.price * item.qty).toFixed(2)}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+                <div style="text-align: right; margin-top: 1rem; font-size: 1.1rem; font-weight: bold;">
+                    Total Amount: ₱${order.total.toFixed(2)}
+                </div>
+            `;
+
+            document.getElementById('order-modal').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
